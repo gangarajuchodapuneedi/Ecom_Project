@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load product_tags %}
+
+{% block content %}
+
+<style>
+    /* Your Existing Product CSS */
+    .product__item {
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        overflow: hidden;
+        background-color: #fff;
+        transition: 0.3s;
+    }
+
+    .product__item:hover {
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .product__thumb img {
+        width: 100%;
+        object-fit: contain;
+        height: auto;
+        transition: transform 0.3s;
+    }
+
+    .product__thumb:hover img {
+        transform: scale(1.05);
+    }
+
+    .product__offer span {
+        background: #ff4d4d;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 5px;
+        font-size: 14px;
+        position: absolute;
+        top: 10px;
+        left: 10px;
+    }
+
+    .product-action {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    .icon-box {
+        background: #f8f8f8;
+        padding: 10px;
+        border-radius: 50%;
+        transition: 0.3s;
+    }
+
+    .icon-box:hover {
+        background: #ddd;
+    }
+
+    .price span {
+        font-size: 18px;
+        font-weight: bold;
+        color: #27ae60;
+    }
+
+    .price del {
+        color: #aaa;
+        font-size: 14px;
+    }
+
+    .product__add-cart-s a, .wc-checkout {
+        background: #ff6600;
+        color: white;
+        padding: 10px;
+        border-radius: 5px;
+        display: block;
+        transition: 0.3s;
+    }
+
+    .product__add-cart-s a:hover, .wc-checkout:hover {
+        background: #e65c00;
+    }
+</style>
+
+<section class="shop-area pt-30 pb-30">
+    <div class="container">
+        <h4 class="mb-20">Products in {{ subcategory.name }}</h4>
+
+        {% if products|length == 0 %}
+        <div class="text-center">
+            <img src="{% static 'assets/img/no_data1.gif' %}" height="400px">
+            <h5 class="mt-10">No products available in this subcategory.</h5>
+        </div>
+        {% else %}
+
+        <div class="tab-content" id="productGridTabContent">
+
+            <!-- Grid View -->
+            <div class="tab-pane fade show active" id="FourCol" role="tabpanel">
+                <div class="tp-wrapper">
+                    <div class="row g-0" id="filteredProductsGrid">
+
+                        {% for i in products %}
+                        <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 mb-4">
+                            <div class="product__item product__item-d">
+                                <div class="product__thumb fix">
+                                    <div class="product-image w-img">
+                                        <a href="{{ i.get_absolute_url }}">
+                                            <img src="{{ i.featured_image }}" alt="product"style="height:220px; object-fit:contain;">
+                                        </a>
+                                    </div>
+                                    {% if i.Discount != 0 %}
+                                    <div class="product__offer">
+                                        <span class="discount">-{{ i.Discount }}%</span>
+                                    </div>
+                                    {% endif %}
+
+                                    <div class="product-action">
+                                        <a href="#" class="icon-box icon-box-1" data-bs-toggle="modal"
+                                            data-bs-target="#productModalId-{{ forloop.counter }}">
+                                            <i class="fal fa-eye"></i>
+                                        </a>
+                                        <form action="{% url 'add_wishlist' %}" method="POST">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="product_id" value="{{ i.id }}">
+                                            <button type="submit" class="icon-box icon-box-1">
+                                                <i class="fal fa-heart"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                                <div class="product__content-3">
+                                    <h6><a href="{{ i.get_absolute_url }}">{{ i.product_name | truncatewords:8 }}</a></h6>
+                                    <div class="rating mb-5">
+                                        <ul>
+                                            <li><a href="#"><i class="fal fa-star"></i></a></li>
+                                            <li><a href="#"><i class="fal fa-star"></i></a></li>
+                                            <li><a href="#"><i class="fal fa-star"></i></a></li>
+                                            <li><a href="#"><i class="fal fa-star"></i></a></li>
+                                            <li><a href="#"><i class="fal fa-star"></i></a></li>
+                                        </ul>
+                                    </div>
+                                    {% if i.Discount != 0 %}
+                                    <div class="price mb-10">
+                                        <span>&#8377; {% cal_sellprice i.price i.Discount %}</span>&nbsp;&nbsp;
+                                        <del>{{ i.price }}</del>
+                                    </div>
+                                    {% else %}
+                                    <div class="price mb-10">
+                                        <span>&#8377; {% cal_sellprice i.price i.Discount %}</span>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="product__add-cart-s text-center">
+                                    <a href="{% url 'cart_add' i.id %}"
+                                        class="cart-btn product-modal-sidebar-open-btn d-flex align-items-center justify-content-center w-100">
+                                        Add to Cart
+                                    </a>
+                                    <button type="button"
+                                        class="wc-checkout d-flex align-items-center justify-content-center w-100"
+                                        data-bs-toggle="modal" data-bs-target="#productModalId-{{ forloop.counter }}">
+                                        Quick View
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+</section>
+
+{% endblock %}

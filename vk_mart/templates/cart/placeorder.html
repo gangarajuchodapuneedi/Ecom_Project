@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% load static %}
+{% load cart_tag %}
+{% block content %}
+
+<div class="page-banner-area page-banner-height-2" data-background="{% static 'assets/img/banner/page-banner-4.jpg'%}">
+    <div class="container">
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="page-banner-content text-center">
+                    <h4 class="breadcrumb-title">Purchase</h4>
+                    <div class="breadcrumb-two">
+                        <nav>
+                            <nav class="breadcrumb-trail breadcrumbs">
+                                <ul class="breadcrumb-menu">
+                                    <li class="breadcrumb-trail">
+                                        <a href="{% url 'home' %}"><span>Home</span></a>
+                                    </li>
+                                    <li class="trail-item">
+                                        <span>Purchase</span>
+                                    </li>
+                                </ul>
+                            </nav> 
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> 
+<br> 
+
+<!-- Cart Area Start -->
+<div class="cart-main-area pt-100px pb-100px">
+    <div class="container">
+        
+        <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-12">
+                <form id="payment-form" method="POST">
+                    <div class="table-content table-responsive cart-table-content">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Image</th>
+                                    <th>Product Name</th>
+                                    <th>Unit Price</th>
+                                    <th>Qty</th>
+                                    <th>Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for key, value in request.session.cart.items %}
+                                <tr>
+                                    <td class="product-thumbnail">
+                                        <a href="/product"><img class="img-responsive ml-15px" src="{{value.featured_image}}" alt="" /></a>
+                                    </td>
+                                    <td class="product-name"><a href="/product">{{ value.product_name|truncatechars:40 }}</a></td>
+                                    <td class="product-price-cart"><span class="amount">&#8377; {{ value.price }}</span></td>
+                                    <td class="cart_quantity">
+                                        <div class="cart_quantity_button">
+                                            <a>{{ value.quantity }}</a>
+                                        </div>
+                                    </td>
+                                    <td class="product-subtotal">&#8377; {{ value.price|multiply:value.quantity }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Payment Method Selection -->
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="cart-shiping-update-wrapper">
+                                <h4>Select Payment Method:</h4>
+                                <label>
+                                    <input type="radio" name="payment_method" value="cod" checked> Cash on Delivery (COD)
+                                </label><br>
+                                <label>
+                                    <input type="radio" name="payment_method" value="paypal"> PayPal
+                                </label><br>
+                                <label>
+                                    <input type="radio" name="payment_method" value="razorpay"> Razorpay
+                                </label><br><br>
+
+                                <!-- Place Order Button -->
+                                <button type="button" id="place-order-btn" class="tp-btn-h1">Place Order</button>
+
+                                <div style="margin-left:1250px; padding-bottom:50px">
+                                    <b>Total: </b> &#8377; {{ total_cost }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Cart Area End -->
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+document.getElementById('place-order-btn').addEventListener('click', function() {
+    var selectedPayment = document.querySelector('input[name="payment_method"]:checked').value;
+
+    if (selectedPayment === "cod") {
+        alert("Your order has been placed successfully with Cash on Delivery (COD). Please keep the exact change ready.");
+        window.location.href = "{% url 'home' %}";  // Redirect to homepage after order placement
+    } 
+    else if (selectedPayment === "paypal") {
+        alert("Redirecting to PayPal for payment...");
+        window.location.href = "https://www.paypal.com";  // Replace with your actual PayPal redirect URL
+    } 
+    else if (selectedPayment === "razorpay") {
+        var options = {
+            "key": "rzp_test_pQ2c5nI3Al0TqY", // Replace with Razorpay Key
+            "name": "VK Market",
+            "description": "Transaction",
+            "image": "https://static.vecteezy.com/system/resources/previews/017/434/098/original/modern-vk-logo-design-for-business-and-company-identity-creative-vk-letter-with-luxury-concept-free-vector.jpg",
+            "order_id": "{{ order_id }}",
+            "callback_url": "{% url 'success' %}",
+            "prefill": {
+                "name": "{{ user }}",
+                "email": "{{ email }}",
+                "contact": "{{ phone }}"
+            },
+            "theme": { "color": "#3399cc" }
+        };
+        var rzp1 = new Razorpay(options);
+        rzp1.open();
+    }
+});
+</script>
+
+{% endblock content %}

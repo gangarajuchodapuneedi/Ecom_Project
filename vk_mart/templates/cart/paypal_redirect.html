@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container text-center mt-5">
+    <h2>Redirecting to PayPal...</h2>
+    <p>Please wait while we process your payment.</p>
+    
+    <script>
+        setTimeout(function () {
+            window.location.href = "https://www.paypal.com/"; // Replace with actual PayPal redirection URL
+        }, 3000); // Redirect after 3 seconds
+    </script>
+</div>
+{% endblock %}
